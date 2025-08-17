@@ -1,0 +1,4 @@
+# Simple game config for an easy-to-win Blackjack
+player_starting_bank = 1000
+bet_amount = 10
+player_edge = 0.05
