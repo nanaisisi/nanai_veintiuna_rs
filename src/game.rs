@@ -2,20 +2,27 @@ use crate::config::GameConfig;
 use rand::seq::SliceRandom;
 use rand::rng;
 use std::io::{self, Write};
+use dialoguer::{Select, theme::ColorfulTheme};
 
 #[derive(Debug, Clone)]
 pub enum MenuChoice {
     StartGame,
+    ShowHelp,
     Quit,
 }
 
 impl MenuChoice {
-    fn from_input(input: &str) -> Option<Self> {
-        match input.trim().to_lowercase().as_str() {
-            "1" | "start" | "s" => Some(MenuChoice::StartGame),
-            "2" | "quit" | "q" => Some(MenuChoice::Quit),
+    fn from_index(index: usize) -> Option<Self> {
+        match index {
+            0 => Some(MenuChoice::StartGame),
+            1 => Some(MenuChoice::ShowHelp),
+            2 => Some(MenuChoice::Quit),
             _ => None,
         }
+    }
+
+    fn menu_items() -> Vec<&'static str> {
+        vec!["ゲーム開始", "ヘルプ表示", "終了"]
     }
 }
 
@@ -115,11 +122,11 @@ fn print_hand(name: &str, hand: &[Card], hide_first: bool) {
 
 fn player_turn(deck: &mut Vec<Card>, hand: &mut Vec<Card>) {
     loop {
-        print_hand("Player", hand, false);
+        print_hand("プレイヤー", hand, false);
         if hand_value(hand) >= 21 {
             break;
         }
-        print!("Hit or Stand? (h/s) ");
+        print!("ヒットまたはスタンド? (h/s) ");
         io::stdout().flush().ok();
         let mut buf = String::new();
         if io::stdin().read_line(&mut buf).is_err() {
@@ -132,7 +139,7 @@ fn player_turn(deck: &mut Vec<Card>, hand: &mut Vec<Card>) {
                 }
             }
             "s" => break,
-            _ => println!("Type 'h' or 's'"),
+            _ => println!("'h' (ヒット) または 's' (スタンド) を入力してください"),
         }
     }
 }
@@ -162,83 +169,102 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
     player_hand.push(deck.pop().unwrap());
     dealer_hand.push(deck.pop().unwrap());
 
-    print_hand("Dealer", &dealer_hand, true);
+    print_hand("ディーラー", &dealer_hand, true);
 
     // simple player strategy biased toward winning: stand on soft 18+
     player_turn(&mut deck, &mut player_hand);
 
     // dealer reveals and plays
-    print_hand("Dealer", &dealer_hand, false);
+    print_hand("ディーラー", &dealer_hand, false);
     dealer_turn(&mut deck, &mut dealer_hand);
-    print_hand("Dealer final", &dealer_hand, false);
+    print_hand("ディーラー最終", &dealer_hand, false);
 
     let pv = hand_value(&player_hand);
     let dv = hand_value(&dealer_hand);
 
     // apply a simple player edge: if player within small margin, boost as win
     let result = if pv > 21 {
-        "Player busts - lose"
+        "プレイヤーがバスト - 負け"
     } else if dv > 21 {
-        "Dealer busts - player wins"
+        "ディーラーがバスト - プレイヤーの勝ち"
     } else if pv > dv {
-        "Player wins"
+        "プレイヤーの勝ち"
     } else if pv < dv {
-        "Player loses"
+        "プレイヤーの負け"
     } else {
         // tie broken by player_edge bias
         if cfg.player_edge > 0.0 {
-            "Player wins (edge)"
+            "プレイヤーの勝ち (エッジ)"
         } else {
-            "Push"
+            "引き分け"
         }
     };
 
-    println!("Player: {} vs Dealer: {} => {}", pv, dv, result);
+    println!("プレイヤー: {} vs ディーラー: {} => {}", pv, dv, result);
     Ok(())
 }
 
-fn display_menu() {
-    println!("\n=== Blackjack Menu ===");
-    println!("1. Start Game");
-    println!("2. Quit");
-    print!("Your choice: ");
-    io::stdout().flush().unwrap();
+fn display_help() {
+    println!("\n=== ブラックジャック ヘルプ ===");
+    println!("基本ルール:");
+    println!("• 目標: 21に可能な限り近づけ、21を超えないようにする");
+    println!("• 絵札（J、Q、K）は10ポイント");
+    println!("• エース（A）は1ポイントまたは11ポイント（有利な方を自動選択）");
+    println!("• ディーラーは16以下でヒット、17以上でスタンドする");
+    println!("\n操作方法:");
+    println!("• h/hit: カードを1枚引く");
+    println!("• s/stand: 現在の手札で勝負する");
+    println!("\nコマンドラインオプション:");
+    println!("• cargo run -- --direct   : メニューをスキップして直接ゲーム開始");
+    println!("• cargo run -- --config FILE : カスタム設定ファイルを使用");
+    println!("• cargo run -- --help     : コマンドヘルプを表示");
+    println!("\nEnterキーを押してメニューに戻る...");
+    let mut _dummy = String::new();
+    let _ = io::stdin().read_line(&mut _dummy);
 }
 
-fn get_user_choice() -> MenuChoice {
-    loop {
-        display_menu();
-        let mut input = String::new();
-        match io::stdin().read_line(&mut input) {
-            Ok(_) => {
-                if let Some(choice) = MenuChoice::from_input(&input) {
-                    return choice;
-                } else {
-                    println!("Invalid choice. Please enter 1 or 2.");
-                }
-            }
-            Err(_) => println!("Error reading input. Please try again."),
-        }
-    }
+fn get_user_choice() -> Result<MenuChoice, Box<dyn std::error::Error>> {
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("オプションを選択してください:")
+        .default(0)
+        .items(&MenuChoice::menu_items())
+        .interact()?;
+
+    MenuChoice::from_index(selection)
+        .ok_or_else(|| "無効な選択です".into())
 }
 
 pub fn run_menu_loop(cfg: &GameConfig) -> anyhow::Result<()> {
-    println!("Welcome to Blackjack!");
+    println!("ブラックジャックへようこそ！");
+    println!("矢印キーで選択、Enterで決定、または 'cargo run -- --help' でCLIオプションを確認\n");
     
     loop {
         match get_user_choice() {
-            MenuChoice::StartGame => {
-                println!("\nStarting game...");
+            Ok(MenuChoice::StartGame) => {
+                println!("\nゲームを開始します...");
                 if let Err(e) = run_game(cfg) {
-                    eprintln!("Game error: {}", e);
+                    eprintln!("ゲームエラー: {}", e);
                 }
-                println!("\nPress Enter to continue...");
+                println!("\nEnterキーを押して続行...");
                 let mut _dummy = String::new();
                 let _ = io::stdin().read_line(&mut _dummy);
             }
-            MenuChoice::Quit => {
-                println!("Thank you for playing!");
+            Ok(MenuChoice::ShowHelp) => {
+                display_help();
+            }
+            Ok(MenuChoice::Quit) => {
+                println!("ご利用ありがとうございました！");
                 break;
+            }
+            Err(e) => {
+                // Handle Ctrl+C or other interruptions gracefully
+                if e.to_string().contains("interrupted") {
+                    println!("\nさようなら！");
+                    break;
+                } else {
+                    eprintln!("メニューエラー: {}", e);
+                    break;
+                }
             }
         }
     }
