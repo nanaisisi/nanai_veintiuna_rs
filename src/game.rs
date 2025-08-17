@@ -1,6 +1,6 @@
 use crate::config::GameConfig;
 use rand::seq::SliceRandom;
-use rand::thread_rng;
+use rand::rng;
 use std::io::{self, Write};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -134,7 +134,7 @@ fn dealer_turn(deck: &mut Vec<Card>, hand: &mut Vec<Card>) {
 pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
     // simple single-hand session demonstrating a player-advantaged rule set
     let mut deck = build_deck();
-    let mut rng = thread_rng();
+    let mut rng = rng();
     deck.shuffle(&mut rng);
 
     let mut player_hand = Vec::new();
