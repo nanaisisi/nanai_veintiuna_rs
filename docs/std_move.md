@@ -25,6 +25,8 @@
 
 | 手札（例） | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | A |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| A,2 (soft 13) | H | H | H | D | D | H | H | H | H | H |
+| A,3 (soft 14) | H | H | H | D | D | H | H | H | H | H |
 | A,4–A,5 (soft 15/16) | H | H | D | D | D | H | H | H | H | H |
 | A,6 (soft 17) | H | D | D | D | D | H | H | H | H | H |
 | A,7 (soft 18) | D | D | D | D | D | S | S | H | H | H |
@@ -32,6 +34,19 @@
 | A,9 (soft 20) | S | S | S | S | S | S | S | S | S | S |
 
 ## ペア（スプリット）
+
+| ペア | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | A |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| A,A | SP | SP | SP | SP | SP | SP | SP | SP | SP | SP |
+| 2,2 | SP | SP | SP | SP | SP | SP | H | H | H | H |
+| 3,3 | SP | SP | SP | SP | SP | SP | H | H | H | H |
+| 4,4 | H | H | H | SP | SP | H | H | H | H | H |
+| 5,5 | D | D | D | D | D | D | D | D | H | H |
+| 6,6 | SP | SP | SP | SP | SP | H | H | H | H | H |
+| 7,7 | SP | SP | SP | SP | SP | SP | H | H | H | H |
+| 8,8 | SP | SP | SP | SP | SP | SP | SP | SP | SP | SP |
+| 9,9 | SP | SP | SP | SP | SP | H | SP | SP | S | S |
+| 10,10 | S | S | S | S | S | S | S | S | S | S |
 
 - A,A: 常に SP
 - 2,2 / 3,3: SP vs 2–7, それ以外は H
