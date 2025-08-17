@@ -3,6 +3,22 @@ use rand::seq::SliceRandom;
 use rand::rng;
 use std::io::{self, Write};
 
+#[derive(Debug, Clone)]
+pub enum MenuChoice {
+    StartGame,
+    Quit,
+}
+
+impl MenuChoice {
+    fn from_input(input: &str) -> Option<Self> {
+        match input.trim().to_lowercase().as_str() {
+            "1" | "start" | "s" => Some(MenuChoice::StartGame),
+            "2" | "quit" | "q" => Some(MenuChoice::Quit),
+            _ => None,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Rank {
     Two,
@@ -178,5 +194,54 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
     };
 
     println!("Player: {} vs Dealer: {} => {}", pv, dv, result);
+    Ok(())
+}
+
+fn display_menu() {
+    println!("\n=== Blackjack Menu ===");
+    println!("1. Start Game");
+    println!("2. Quit");
+    print!("Your choice: ");
+    io::stdout().flush().unwrap();
+}
+
+fn get_user_choice() -> MenuChoice {
+    loop {
+        display_menu();
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => {
+                if let Some(choice) = MenuChoice::from_input(&input) {
+                    return choice;
+                } else {
+                    println!("Invalid choice. Please enter 1 or 2.");
+                }
+            }
+            Err(_) => println!("Error reading input. Please try again."),
+        }
+    }
+}
+
+pub fn run_menu_loop(cfg: &GameConfig) -> anyhow::Result<()> {
+    println!("Welcome to Blackjack!");
+    
+    loop {
+        match get_user_choice() {
+            MenuChoice::StartGame => {
+                println!("\nStarting game...");
+                if let Err(e) = run_game(cfg) {
+                    eprintln!("Game error: {}", e);
+                }
+                println!("\nPress Enter to continue...");
+                let mut _dummy = String::new();
+                let _ = io::stdin().read_line(&mut _dummy);
+            }
+            MenuChoice::Quit => {
+                println!("Thank you for playing!");
+                break;
+            }
+        }
+    }
+    
     Ok(())
 }

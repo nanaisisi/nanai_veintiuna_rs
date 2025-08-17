@@ -5,8 +5,8 @@ use config::GameConfig;
 use std::path::Path;
 
 fn main() -> anyhow::Result<()> {
-    // Keep main minimal: load config and run a single game session
+    // Keep main minimal: load config and run menu loop
     let cfg = GameConfig::load(Path::new("game_config.toml"))?;
-    game::run_game(&cfg)?;
+    game::run_menu_loop(&cfg)?;
     Ok(())
 }
