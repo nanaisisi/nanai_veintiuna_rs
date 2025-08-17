@@ -155,6 +155,10 @@ fn dealer_turn(deck: &mut Vec<Card>, hand: &mut Vec<Card>) {
 }
 
 pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
+    println!("現在の残高: {}{}", cfg.player_starting_bank, cfg.currency_name);
+    println!("ベット額: {}{}", cfg.bet_amount, cfg.currency_name);
+    println!();
+
     // simple single-hand session demonstrating a player-advantaged rule set
     let mut deck = build_deck();
     let mut rng = rng();
@@ -201,6 +205,20 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
     };
 
     println!("プレイヤー: {} vs ディーラー: {} => {}", pv, dv, result);
+    
+    // Show winnings or losses
+    match result {
+        s if s.contains("プレイヤーの勝ち") => {
+            println!("獲得: +{}{}", cfg.bet_amount, cfg.currency_name);
+        }
+        s if s.contains("負け") => {
+            println!("損失: -{}{}", cfg.bet_amount, cfg.currency_name);
+        }
+        _ => {
+            println!("引き分け: 変動なし");
+        }
+    }
+    
     Ok(())
 }
 
@@ -236,6 +254,8 @@ fn get_user_choice() -> Result<MenuChoice, Box<dyn std::error::Error>> {
 
 pub fn run_menu_loop(cfg: &GameConfig) -> anyhow::Result<()> {
     println!("ブラックジャックへようこそ！");
+    println!("プレイヤー資金: {}{} (通貨名: {})", 
+             cfg.player_starting_bank, cfg.currency_name, cfg.currency_full_name);
     println!("矢印キーで選択、Enterで決定、または 'cargo run -- --help' でCLIオプションを確認\n");
     
     loop {

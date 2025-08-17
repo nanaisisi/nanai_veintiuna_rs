@@ -1,4 +1,12 @@
 # Simple game config for an easy-to-win Blackjack
-player_starting_bank = 1000
-bet_amount = 10
+
+# ゲーム内通貨設定
+currency_name = "np"          # 通貨名称
+currency_full_name = "nanai points"  # 通貨の正式名称
+
+# プレイヤー資金設定  
+player_starting_bank = 1000  # 初期持ち金
+bet_amount = 10              # デフォルトベット額
+
+# ゲームバランス
 player_edge = 0.05
