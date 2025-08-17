@@ -1,6 +1,6 @@
 # 概要
 
-ブラックジャックの簡潔な定石（ベーシックストラテジー）です。ディーラーは17未満でヒットする標準ルールを想定しています。
+ブラックジャックの簡潔な定石（ベーシックストラテジー）です。本ドキュメントは「サレンダーあり（Late Surrender）」を前提とします。ディーラーは17未満でヒットする標準ルールを想定しています。
 
 略記:
 
@@ -8,6 +8,7 @@
 - S: Stand（スタンド）
 - D: Double if allowed, otherwise Hit（ダブル可能ならダブル、不可ならヒット）
 - SP: Split（スプリット）
+- SU: Surrender（後期サレンダー）
 
 ## ハードハンド（Aを含まない合計）
 
@@ -16,9 +17,10 @@
 | 8以下 | H | H | H | H | H | H | H | H | H | H |
 | 9 | H | D | D | D | D | H | H | H | H | H |
 | 10 | D | D | D | D | D | D | D | D | H | H |
-| 11 | D | D | D | D | D | D | D | D | D | D |
+| 11 | D | D | D | D | D | D | D | D | D | H |
 | 12 | H | H | S | S | S | H | H | H | H | H |
-| 13–16 | S | S | S | S | S | H | H | H | H | H |
+| 13–15 | S | S | S | S | S | H | H | H | SU | H |
+| 16 | S | S | S | S | S | H | H | SU | SU | SU |
 | 17–20 | S | S | S | S | S | S | S | S | S | S |
 
 ## ソフトハンド（Aを含む合計）
@@ -29,8 +31,8 @@
 | A,3 (soft 14) | H | H | H | D | D | H | H | H | H | H |
 | A,4–A,5 (soft 15/16) | H | H | D | D | D | H | H | H | H | H |
 | A,6 (soft 17) | H | D | D | D | D | H | H | H | H | H |
-| A,7 (soft 18) | D | D | D | D | D | S | S | H | H | H |
-| A,8 (soft 19) | S | S | D | D | D | S | S | H | H | H |
+| A,7 (soft 18) | S | D | D | D | D | S | S | H | H | H |
+| A,8 (soft 19) | S | S | S | S | S | S | S | S | S | S |
 | A,9 (soft 20) | S | S | S | S | S | S | S | S | S | S |
 
 ## ペア（スプリット）
@@ -45,7 +47,7 @@
 | 6,6 | SP | SP | SP | SP | SP | H | H | H | H | H |
 | 7,7 | SP | SP | SP | SP | SP | SP | H | H | H | H |
 | 8,8 | SP | SP | SP | SP | SP | SP | SP | SP | SP | SP |
-| 9,9 | SP | SP | SP | SP | SP | H | SP | SP | S | S |
+| 9,9 | SP | SP | SP | SP | SP | S | SP | SP | S | S |
 | 10,10 | S | S | S | S | S | S | S | S | S | S |
 
 - A,A: 常に SP
