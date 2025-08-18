@@ -1,5 +1,9 @@
 mod config;
 mod game;
+mod card;
+mod menu;
+mod game_action;
+mod blackjack;
 
 use clap::{Arg, Command};
 use config::GameConfig;
