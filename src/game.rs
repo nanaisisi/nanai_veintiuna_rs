@@ -173,6 +173,10 @@ fn build_deck() -> Vec<Card> {
     deck
 }
 
+fn is_blackjack(hand: &[Card]) -> bool {
+    hand.len() == 2 && hand_value(hand) == 21
+}
+
 fn hand_value(hand: &[Card]) -> u8 {
     let mut sum: u8 = hand.iter().map(|c| c.value()).sum();
     let mut aces = hand.iter().filter(|c| c.is_ace()).count();
@@ -351,6 +355,32 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
 
     print_hand("ディーラー", &dealer_hand, true);
 
+    // Check for dealer blackjack
+    let dealer_has_blackjack = is_blackjack(&dealer_hand);
+    if dealer_has_blackjack {
+        println!("\nディーラーがブラックジャック！");
+        print_hand("ディーラー", &dealer_hand, false);
+        
+        // Check if player also has blackjack (only applies to first hand before any splits)
+        let player_has_blackjack = player_hands.len() == 1 && is_blackjack(&player_hands[0]);
+        
+        if player_has_blackjack {
+            println!("プレイヤーもブラックジャック！引き分けです");
+            print_hand("プレイヤー", &player_hands[0], false);
+            println!("結果: 引き分け - 変動なし");
+        } else {
+            println!("ディーラーの勝利");
+            print_hand("プレイヤー", &player_hands[0], false);
+            println!("損失: -{}{}", cfg.bet_amount, cfg.currency_name);
+        }
+        
+        let continue_playing = show_post_game_menu(cfg)?;
+        if continue_playing {
+            return run_game(cfg);
+        }
+        return Ok(());
+    }
+
     let mut total_bet = cfg.bet_amount;
     let mut results: Vec<PlayerActionResult> = Vec::new();
 
@@ -360,6 +390,15 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
         let mut current_hand = player_hands[hand_index].clone();
         
         println!("\n--- 手札 {} ---", hand_index + 1);
+        
+        // Check for player blackjack
+        if is_blackjack(&current_hand) {
+            println!("ブラックジャック！");
+            print_hand("プレイヤー", &current_hand, false);
+            player_hands[hand_index] = current_hand;
+            hand_index += 1; // Move to next hand
+            continue;
+        }
         
         // Check if this is the first action for this hand (for split/double/surrender eligibility)
         let is_first_action = current_hand.len() == 2;
@@ -398,11 +437,20 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
         }
     }
 
-    // dealer reveals and plays
-    println!("\n--- ディーラーのターン ---");
-    print_hand("ディーラー", &dealer_hand, false);
-    dealer_turn(&mut deck, &mut dealer_hand);
-    print_hand("ディーラー最終", &dealer_hand, false);
+    // Check if all player hands are bust - if so, skip dealer turn
+    let all_hands_bust = player_hands.iter().all(|hand| hand_value(hand) > 21);
+
+    if all_hands_bust {
+        println!("\n--- 全ての手札がバスト ---");
+        print_hand("ディーラー", &dealer_hand, false);
+        println!("ディーラーはカードを引く必要がありません");
+    } else {
+        // dealer reveals and plays
+        println!("\n--- ディーラーのターン ---");
+        print_hand("ディーラー", &dealer_hand, false);
+        dealer_turn(&mut deck, &mut dealer_hand);
+        print_hand("ディーラー最終", &dealer_hand, false);
+    }
 
     let dv = hand_value(&dealer_hand);
 
@@ -414,10 +462,19 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
         println!("\n--- 手札 {} の結果 ---", i + 1);
         print_hand(&format!("プレイヤー手札{}", i + 1), hand, false);
         
+        let player_has_bj = is_blackjack(hand);
+        let dealer_has_bj = is_blackjack(&dealer_hand);
+        
         let result = if pv > 21 {
             "バスト - 負け"
         } else if dv > 21 {
             "ディーラーがバスト - 勝ち"
+        } else if player_has_bj && !dealer_has_bj {
+            "ブラックジャック - 勝ち"
+        } else if !player_has_bj && dealer_has_bj {
+            "ディーラーブラックジャック - 負け"
+        } else if player_has_bj && dealer_has_bj {
+            "両方ブラックジャック - 引き分け"
         } else if pv > dv {
             "勝ち"
         } else if pv < dv {
