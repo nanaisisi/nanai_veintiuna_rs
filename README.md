@@ -1,3 +1,5 @@
+# AI 生成です。
+
 # nanai_veintiuna_rs
 
 メニュー駆動式ブラックジャックゲーム（Rust実装）
