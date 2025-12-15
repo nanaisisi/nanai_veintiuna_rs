@@ -54,7 +54,6 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
     }
 
     let mut total_bet = cfg.bet_amount;
-    let mut results: Vec<PlayerActionResult> = Vec::new();
 
     // Process each player hand (initially just one, but can become multiple with splits)
     let mut hand_index = 0;
@@ -76,7 +75,7 @@ pub fn run_game(cfg: &GameConfig) -> anyhow::Result<()> {
         let is_first_action = current_hand.len() == 2;
         
         match player_turn(&mut deck, &mut current_hand, is_first_action)? {
-            PlayerActionResult::Continue | PlayerActionResult::Stand => {
+            PlayerActionResult::Stand => {
                 player_hands[hand_index] = current_hand;
                 hand_index += 1; // Move to next hand
             }
@@ -204,7 +203,7 @@ fn show_post_game_menu(cfg: &GameConfig) -> anyhow::Result<bool> {
         let selection = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("次のアクションを選択してください:")
             .default(0)
-            .items(&PostGameChoice::menu_items())
+            .items(PostGameChoice::menu_items())
             .interact()?;
 
         match PostGameChoice::from_index(selection) {

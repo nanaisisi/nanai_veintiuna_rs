@@ -70,7 +70,7 @@ pub fn get_user_choice() -> Result<MenuChoice, Box<dyn std::error::Error>> {
     let selection = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("オプションを選択してください:")
         .default(0)
-        .items(&MenuChoice::menu_items())
+        .items(MenuChoice::menu_items())
         .interact()?;
 
     MenuChoice::from_index(selection)

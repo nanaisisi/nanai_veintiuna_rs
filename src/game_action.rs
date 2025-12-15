@@ -11,7 +11,6 @@ pub enum GameAction {
 
 #[derive(Debug, Clone)]
 pub enum PlayerActionResult {
-    Continue,
     Stand,
     DoubleDown,
     Split(Vec<Card>, Vec<Card>), // Two split hands
@@ -19,17 +18,6 @@ pub enum PlayerActionResult {
 }
 
 impl GameAction {
-    pub fn from_index(index: usize) -> Option<Self> {
-        match index {
-            0 => Some(GameAction::Hit),
-            1 => Some(GameAction::Stand),
-            2 => Some(GameAction::DoubleDown),
-            3 => Some(GameAction::Split),
-            4 => Some(GameAction::Surrender),
-            _ => None,
-        }
-    }
-
     pub fn menu_items(can_double: bool, can_split: bool, can_surrender: bool) -> Vec<&'static str> {
         let mut items = vec!["ヒット（カードを引く）", "スタンド（現在の手札で勝負）"];
         

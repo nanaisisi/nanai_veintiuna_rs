@@ -71,7 +71,7 @@ pub fn build_deck() -> Vec<Card> {
     deck
 }
 
-pub fn shuffle_deck(deck: &mut Vec<Card>) {
+pub fn shuffle_deck(deck: &mut [Card]) {
     let mut rng = rand::rng();
     deck.shuffle(&mut rng);
 }
@@ -108,17 +108,15 @@ pub fn print_hand(name: &str, hand: &[Card], hide_first: bool) {
     for (i, c) in hand.iter().enumerate() {
         if i == 0 && hide_first {
             print!("[hidden] ");
-        } else {
-            if c.is_ace() {
-                if current_aces_as_1 > 0 {
-                    print!("A(1) ");
-                    current_aces_as_1 -= 1;
-                } else {
-                    print!("A(11) ");
-                }
+        } else if c.is_ace() {
+            if current_aces_as_1 > 0 {
+                print!("A(1) ");
+                current_aces_as_1 -= 1;
             } else {
-                print!("{} ", c.short());
+                print!("A(11) ");
             }
+        } else {
+            print!("{} ", c.short());
         }
     }
     if !hide_first {
